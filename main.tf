@@ -1,13 +1,13 @@
 # VPC
 resource "digitalocean_vpc" "main" {
-  name = "piotrkoska"
+  name = "jzalewski"
   region = "fra1"
-  ip_range = "10.113.0.0/24"
+  ip_range = "10.113.129.0/24"
 }
 
 # VM
 resource "digitalocean_droplet" "main" {
-  name = "piotrkoska-zad01"
+  name = "jzalewski-zad01"
     image = "ubuntu-20-04-x64"
     region = "fra1"
     size = "s-1vcpu-1gb"
@@ -16,13 +16,13 @@ resource "digitalocean_droplet" "main" {
 }
 
 resource "digitalocean_ssh_key" "name" {
-  name = "piotrkkoska"
+  name = "jzalewski"
   public_key = tls_private_key.main.public_key_openssh
 }
 
 # firewall
 resource "digitalocean_firewall" "name" {
-  name = "piotrkoska-firewall"
+  name = "jzalewski-firewall"
 
   droplet_ids = [digitalocean_droplet.main.id]
 
