@@ -1,111 +1,46 @@
-<<<<<<< HEAD
-resource "digitalocean_droplet" "main" {
-  count = 1
-  name = var.droplet_name
-  image = var.droplet_image
-  size = var.droplet_size
-  region = var.region
-  backups = false
-  monitoring = false
-  ipv6 = false
-  vpc_uuid = digitalocean_vpc.main.id
-  ssh_keys = [digitalocean_ssh_key.main.id]
-  tags = [ "testserver"]
-  user_data = null
-  droplet_agent = false
-}
-
+# VPC
 resource "digitalocean_vpc" "main" {
-    name = var.vpc_name
-    region = var.region
-    ip_range = var.vpc_ip_range
-    description = "This is a VPC for ${var.vpc_name} test purposes"
+  name = "piotrkoska"
+  region = "fra1"
+  ip_range = "10.113.0.0/24"
 }
 
-resource "digitalocean_firewall" "main" {
-  name = var.firewall_name
-  droplet_ids = [digitalocean_droplet.main[0].id]
-
-  dynamic "inbound_rule" {
-    for_each = local.firewall_configuration.inbound
-    content {
-      protocol = inbound_rule.value.protocol
-      port_range = inbound_rule.value.port_range
-      source_addresses = inbound_rule.value.source_addresses
-    }
-  }
-
-  dynamic "outbound_rule" {
-    for_each = local.firewall_configuration.outbound
-    content {
-      protocol = outbound_rule.value.protocol
-      port_range = outbound_rule.value.port_range
-      destination_addresses = outbound_rule.value.destination_addresses
-    }
-  }
+# VM
+resource "digitalocean_droplet" "main" {
+  name = "piotrkoska-zad01"
+    image = "ubuntu-20-04-x64"
+    region = "fra1"
+    size = "s-1vcpu-1gb"
+    vpc_uuid = digitalocean_vpc.main.id
+    ssh_keys = [ digitalocean_ssh_key.name.id ]
 }
 
-resource "digitalocean_ssh_key" "main" {
-  name = var.ssh_key_name
+resource "digitalocean_ssh_key" "name" {
+  name = "piotrkkoska"
   public_key = tls_private_key.main.public_key_openssh
 }
 
-resource "tls_private_key" "main" {
-    algorithm = "ED25519"
-}
-=======
-resource "digitalocean_droplet" "main" {
-  count = 1
-  name = var.droplet_name
-  image = var.droplet_image
-  size = var.droplet_size
-  region = var.region
-  backups = false
-  monitoring = false
-  ipv6 = false
-  vpc_uuid = digitalocean_vpc.main.id
-  ssh_keys = [digitalocean_ssh_key.main.id]
-  tags = [ "testserver"]
-  user_data = null
-  droplet_agent = false
-}
+# firewall
+resource "digitalocean_firewall" "name" {
+  name = "piotrkoska-firewall"
 
-resource "digitalocean_vpc" "main" {
-    name = var.vpc_name
-    region = var.region
-    ip_range = var.vpc_ip_range
-    description = "This is a VPC for ${var.vpc_name} test purposes"
-}
+  droplet_ids = [digitalocean_droplet.main.id]
 
-resource "digitalocean_firewall" "main" {
-  name = var.firewall_name
-  droplet_ids = [digitalocean_droplet.main[0].id]
-
-  dynamic "inbound_rule" {
-    for_each = local.firewall_configuration.inbound
-    content {
-      protocol = inbound_rule.value.protocol
-      port_range = inbound_rule.value.port_range
-      source_addresses = inbound_rule.value.source_addresses
-    }
+  inbound_rule {
+    protocol = "tcp"
+    port_range = "22"
+    source_addresses = ["0.0.0.0/0"]
+  }
+  
+  outbound_rule {
+    protocol = "tcp"
+    port_range = "1-65535"
+    destination_addresses = ["0.0.0.0/0"]
   }
 
-  dynamic "outbound_rule" {
-    for_each = local.firewall_configuration.outbound
-    content {
-      protocol = outbound_rule.value.protocol
-      port_range = outbound_rule.value.port_range
-      destination_addresses = outbound_rule.value.destination_addresses
-    }
+  outbound_rule {
+    protocol = "udp"
+    port_range = "1-65535"
+    destination_addresses = ["0.0.0.0/0"]
   }
 }
-
-resource "digitalocean_ssh_key" "main" {
-  name = var.ssh_key_name
-  public_key = tls_private_key.main.public_key_openssh
-}
-
-resource "tls_private_key" "main" {
-    algorithm = "ED25519"
-}
->>>>>>> c13af00 (ini)
